@@ -16,6 +16,13 @@ namespace SeasoningAndCandle.Backend.Application.Commands
             _authentificationService = authentificationService;
         }
 
+        /// <summary>
+        /// Use this method to handle the request
+        /// </summary>
+        /// <param name="request">The user crendentials to login successfully</param>
+        /// <param name="cancellationToken">Cancellation token</param>
+        /// <returns>Token Credentials</returns>
+        /// <exception cref="Exception">Throws user or password wrong error</exception>
         public async Task<TokenViewModel> Handle(LoginCommand request, CancellationToken cancellationToken)
         {
             //TODO: Validar la data que nos llega en el request

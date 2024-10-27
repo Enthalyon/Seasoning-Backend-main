@@ -10,7 +10,7 @@ GO
 -- USUARIOS --
 CREATE TABLE Users (
 	UserId INT IDENTITY(1000,1) NOT NULL,
-	FirstName,  VARCHAR(100) NOT NULL,
+	FirstName VARCHAR(100) NOT NULL,
 	LastName VARCHAR(100) NOT NULL,
 	Phone VARCHAR(50),
 	Email VARCHAR(100) NOT NULL,
@@ -51,6 +51,7 @@ CREATE TABLE Products (
 	ProductId INT IDENTITY(1000, 1) NOT NULL,
 	Name VARCHAR(200) NOT NULL,
 	Description TEXT,
+	ImageUrl TEXT,
 	Stock INT NOT NULL,
 	Price DECIMAL NOT NULL,
 	CreatedAt DATETIME NOT NULL,
@@ -113,12 +114,25 @@ INSERT INTO Sales (UserCode, CreatedAt) VALUES (1001, GETUTCDATE());
 INSERT INTO Sales (UserCode, CreatedAt) VALUES (1002, GETUTCDATE());
 
 -- Tuplas de Products --
-INSERT INTO Products (Name, Description, Stock, Price, CreatedAt) 
-	VALUES ('Lechona', 'La lechona de mejor calidad', 3, 20000, GETUTCDATE());
-INSERT INTO Products (Name, Description, Stock, Price, CreatedAt) 
-	VALUES ('Bandeja Paisa', 'Bandeja con frijoles, huevo, chorizo, chicharron, aguacate y patacones', 2, 15000, GETUTCDATE());
-INSERT INTO Products (Name, Description, Stock, Price, CreatedAt) 
-	VALUES ('Empanadas', 'Empanadas rellenas de carne',10, 3000, GETUTCDATE());
+INSERT INTO Products (Name, Description, Stock, Price, ImageUrl, CreatedAt) 
+	VALUES ('Lechona', 'La lechona de mejor calidad', 3, 20000, 'https://cdn.colombia.com/gastronomia/2011/07/22/lechona-1476.jpg', GETUTCDATE());
+INSERT INTO Products (Name, Description, Stock, Price, ImageUrl, CreatedAt) 
+	VALUES ('Bandeja Paisa', 'Bandeja con frijoles, huevo, chorizo, chicharron, aguacate y patacones', 2, 15000, 'https://cdn.colombia.com/gastronomia/2011/08/02/bandeja-paisa-1616.gif', GETUTCDATE());
+INSERT INTO Products (Name, Description, Stock, Price, ImageUrl, CreatedAt) 
+	VALUES ('Empanadas', 'Empanadas rellenas de carne',10, 3000, 'https://assets.elgourmet.com/wp-content/uploads/2023/10/EMPANADAS-1-1024x683.jpg.webp', GETUTCDATE());
+INSERT INTO Products (Name, Description, Stock, Price, ImageUrl, CreatedAt) 
+	VALUES ('Hamburguesa', 'Hamburguesa de res con queso y tocineta',10, 3000, 'https://cdn.colombia.com/gastronomia/2016/11/17/hamburguesa-artesanal-3029.jpg', GETUTCDATE());	
+
+-- Tuplas de Categories --
+INSERT INTO Categories (Name, Description) VALUES ('Carnes', '¡Carnes en todas sus formas y de la mejor calidad!');
+INSERT INTO Categories (Name, Description) VALUES ('Comida rapida', '¡Lo mejor en comida rápida para toda la familia!');
+INSERT INTO Categories (Name, Description) VALUES ('Corrientazo', '¡En infantable platillo colombiano!');
+
+-- Tuplas de ProductCategories --
+INSERT INTO ProductCategories (ProductCode, CategoryCode) VALUES (1000, 1000);
+INSERT INTO ProductCategories (ProductCode, CategoryCode) VALUES (1002, 1001);
+INSERT INTO ProductCategories (ProductCode, CategoryCode) VALUES (1001, 1002);
+INSERT INTO ProductCategories (ProductCode, CategoryCode) VALUES (1003, 1001);
 
 -- Tuplas de SaleProducts --
 INSERT INTO SaleProducts (SaleCode, ProductCode, Quantity, UnitPrice) 
@@ -127,16 +141,6 @@ INSERT INTO SaleProducts (SaleCode, ProductCode, Quantity, UnitPrice)
 	VALUES (1001, 1001, 1, 15000);
 INSERT INTO SaleProducts (SaleCode, ProductCode, Quantity, UnitPrice) 
 	VALUES (1002, 1002, 3, 3000);
-
--- Tuplas de Categories --
-INSERT INTO Categories (Name, Description) VALUES ('Carnes', '');
-INSERT INTO Categories (Name, Description) VALUES ('Comida rapida', 'Comida rapida');
-INSERT INTO Categories (Name, Description) VALUES ('Corrientazo', 'Corrientazo');
-
--- Tuplas de ProductCategories --
-INSERT INTO ProductCategories (ProductCode, CategoryCode) VALUES (1000, 1000);
-INSERT INTO ProductCategories (ProductCode, CategoryCode) VALUES (1001, 1001);
-INSERT INTO ProductCategories (ProductCode, CategoryCode) VALUES (1002, 1002);
 
 -- >>>>>>>>> Consultas <<<<<<<<<<<<< --
 
@@ -197,8 +201,43 @@ SELECT
 	C.CategoryId,
 	P.Name ProductName,
 	C.Name AS CategoryName,
-	P.Stock
+	P.Stock,
+	P.ImageUrl
 FROM ProductCategories AS PC
 INNER JOIN Categories AS C ON PC.CategoryCode = C.CategoryId
 INNER JOIN Products AS P ON PC.ProductCode = P.ProductId
 GO
+
+--Traer N cantidad de productos por cada categoria
+DECLARE @NProcductsByCategory AS INT;
+SET @NProcductsByCategory = 2;
+
+WITH ProductsByCategory AS (
+    SELECT 
+        P.ProductId,
+        C.CategoryId,
+        C.Name AS CategoryName,
+        P.Name AS ProductName,
+		P.Description,
+		P.Price,
+        P.Stock,
+        P.ImageUrl,
+        ROW_NUMBER() OVER (PARTITION BY C.CategoryId ORDER BY P.ProductId) AS ProducRow
+    FROM ProductCategories AS PC
+    INNER JOIN Categories AS C 
+    ON PC.CategoryCode = C.CategoryId
+    INNER JOIN Products AS P 
+    ON PC.ProductCode = P.ProductId
+)
+SELECT 
+    ProductId,
+    CategoryId,
+    CategoryName,
+    ProductName,
+	Description,
+	Price,
+    Stock,
+    ImageUrl
+FROM ProductsByCategory
+WHERE ProducRow <= @NProcductsByCategory
+

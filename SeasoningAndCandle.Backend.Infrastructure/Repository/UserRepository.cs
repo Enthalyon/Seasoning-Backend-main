@@ -3,7 +3,6 @@ using Mapster;
 using SeasoningAndCandle.Backend.Domain.Entities;
 using SeasoningAndCandle.Backend.Domain.Interfaces;
 using SeasoningAndCandle.Backend.Infrastructure.Models;
-using System.Data.SqlClient;
 
 namespace SeasoningAndCandle.Backend.Infrastructure.Repository
 {

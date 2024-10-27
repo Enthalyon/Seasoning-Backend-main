@@ -4,6 +4,8 @@ using SeasoningAndCandle.Backend.Application.Commands;
 using SeasoningAndCandle.Backend.Application.Services.Interfaces;
 using SeasoningAndCandle.Backend.Domain.Interfaces;
 using SeasoningAndCandle.Backend.Infrastructure.DbProvider;
+using SeasoningAndCandle.Backend.Infrastructure.Mappers;
+using SeasoningAndCandle.Backend.Infrastructure.Mappers.Interfaces;
 using SeasoningAndCandle.Backend.Infrastructure.Repository;
 using System.Data.SqlClient;
 
@@ -40,6 +42,8 @@ namespace SeasoningAndCandle.Backend.Api
             _ = builder.Services.AddSingleton<IDbProvider, DbProvider>(service => new DbProvider(builder.Configuration.GetConnectionString("SeasoningAndCandleDb") ?? ""));
             _ = builder.Services.AddSingleton<IUserRepository, UserRepository>();
             _ = builder.Services.AddSingleton<IAuthentificationService, AuthentificationService>();
+            _ = builder.Services.AddSingleton<IProductRepository, ProductRepository>();
+            _ = builder.Services.AddSingleton<IProductMapper, ProductMapper>();
 
             var app = builder.Build();
 
