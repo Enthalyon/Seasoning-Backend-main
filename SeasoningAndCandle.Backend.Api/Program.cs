@@ -44,6 +44,7 @@ namespace SeasoningAndCandle.Backend.Api
             _ = builder.Services.AddSingleton<IAuthentificationService, AuthentificationService>();
             _ = builder.Services.AddSingleton<IProductRepository, ProductRepository>();
             _ = builder.Services.AddSingleton<IProductMapper, ProductMapper>();
+            _ = builder.Services.AddSingleton<ICategoryRepository, CategoryRepository>();
 
             var app = builder.Build();
 
